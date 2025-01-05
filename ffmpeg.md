@@ -5,9 +5,9 @@
 [![deno](https://img.shields.io/badge/deno-^2.1.4-000?logo=deno)](https://docs.deno.com/runtime/)
 ## Usage
 
-### MP4 to M3U8
+::: code-group
 
-```typescript
+```typescript [mp4-to-m3u8.ts]
 import { ffmpeg } from "https://deno.land/x/deno_ffmpeg@v3.1.0/mod.ts";
 import { join } from "jsr:@std/path";
 
@@ -16,7 +16,6 @@ const videoRender = ffmpeg({
     ffmpegDir: "D:\\ffmpeg.exe", // FFmpeg binary directory, need to be set
 });
 
-// 输出进度
 const iterator = await videoRender.save("./sample.m3u8", true, {
     "crf": "0",
     "hls_key_info_file": "D:/encrypt.key", // HLS encryption key file
@@ -29,16 +28,11 @@ for await (const iter of iterator) {
 console.log("All encodings done!");
 ```
 
-### M3U8 to MP4
-
-::: info
-
-The input must be a network address. 由于加密的缘故，在本地的
-m3u8文件需要使用网络地址。 并且需要将密钥文件中的地址替换为本地相对路径。
-
-:::
-
-```typescript
+```typescript [m3u8-to-mp4.ts]
+/**
+ * The input must be a network address. 由于加密的缘故，在本地的
+ * m3u8文件需要使用网络地址。 并且需要将密钥文件中的地址替换为本地相对路径。
+*/
 import { ffmpeg } from "https://deno.land/x/deno_ffmpeg@v3.1.0/mod.ts";
 
 const videoRender = ffmpeg({
@@ -60,9 +54,7 @@ console.log("All encodings done!");
 // ffmpeg -i "http://localhost:8000/sample.m3u8" -c copy out.mp4
 ```
 
-### Parser-M3U8
-
-```typescript
+```typescript [m3u8-parser.ts]
 import { hexStringToUint32Array, parseAttributes } from "./utils.ts";
 
 export function parserM3U8(str: string) {
@@ -233,32 +225,4 @@ export function hexStringToUint32Array(hexString: string): Uint32Array {
 }
 ```
 
-### Encrypt And Decrypt (for Deno)
-
-```typescript
-export async function subtleArguments(
-    iv: Uint8Array,
-    content: Uint8Array,
-): Promise<
-    [
-        AesCbcParams,
-        CryptoKey,
-        Uint8Array,
-    ]
-> {
-    return [
-        { name: "AES-CBC", iv },
-        await crypto.subtle.importKey("raw", iv, "AES-CBC", true, [
-            "encrypt",
-            "decrypt",
-        ]),
-        content,
-    ];
-}
-
-export const encrypt = async (iv: Uint8Array, content: Uint8Array) =>
-    await crypto.subtle.encrypt(...(await subtleArguments(iv, content)));
-
-export const decrypt = async (iv: Uint8Array, content: Uint8Array) =>
-    crypto.subtle.decrypt(...(await subtleArguments(iv, content)));
-```
+:::
